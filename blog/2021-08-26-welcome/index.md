@@ -1,8 +1,8 @@
 ---
 slug: welcome
 title: Welcome
-authors: [xxc]
-tags: [hello]
+authors: [xxc, wj]
+tags: [hello, xxc, wj]
 ---
 
-Welcome !
+Welcome to my blog ~
