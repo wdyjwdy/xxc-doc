@@ -1,7 +1,7 @@
 ---
 slug: welcome
 title: Welcome
-authors: [xxc, xxc]
+authors: [xxc]
 tags: [hello]
 ---
 
