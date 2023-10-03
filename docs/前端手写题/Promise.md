@@ -44,19 +44,23 @@ constructor(executor) {
 	this.onRejectedCallbacks = []
 	
 	const resolve = value => {
-		if (this.state === 'pending') {
-			this.state = 'fulfilled'
-			this.result = value
-			this.onFulfilledCallbacks.forEach(cb => cb(this.result))
-		}
+		queueMicrotask(() => { // 处理微任务
+			if (this.state === 'pending') { // 处理状态单次变化
+				this.state = 'fulfilled'
+				this.result = value
+				this.onFulfilledCallbacks.forEach(cb => cb(this.result))
+			}
+		})
 	}
 	
 	const reject = value => {
-		if (this.state === 'pending') {
-			this.state = 'rejected'
-			this.result = value
-			this.onRejectedCallbacks.forEach(cb => cb(this.result))
-		}
+		queueMicrotask(() => {
+			if (this.state === 'pending') {
+				this.state = 'rejected'
+				this.result = value
+				this.onRejectedCallbacks.forEach(cb => cb(this.result))
+			}
+		})
 	}
 	
 	executor(resolve, reject)
@@ -174,11 +178,4 @@ static allSettled(promises) {
 		})
 	})
 }
-```
-## 微任务
-```js
-// resolve, reject
-this.onFulfilledCallbacks.forEach(cb => {queueMicrotask(() => {cb(this.result)})})
-// then
-if (this.state === 'fulfilled') {queueMicrotask(() => {resolvePromise(onFulfilled(this.result))})}
 ```
