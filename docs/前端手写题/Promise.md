@@ -175,3 +175,10 @@ static allSettled(promises) {
 	})
 }
 ```
+## 微任务
+```js
+// resolve, reject
+this.onFulfilledCallbacks.forEach(cb => {queueMicrotask(() => {cb(this.result)})})
+// then
+if (this.state === 'fulfilled') {queueMicrotask(() => {resolvePromise(onFulfilled(this.result))})}
+```
