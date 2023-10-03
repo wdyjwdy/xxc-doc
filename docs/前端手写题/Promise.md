@@ -33,6 +33,8 @@ class MyPromise {
 	static any() {}
 	static allSettled() {}
 	static race() {}
+	static resolve() {}
+	static reject() {}
 }
 ```
 ## constructor()
@@ -176,6 +178,23 @@ static allSettled(promises) {
 			if (promise instanceof MyPromise) {promise.then(onFulfilled, onRejected)}
 			else {onFulfilled(promise)}
 		})
+	})
+}
+```
+## resolve()
+```js
+static resolve(value) {
+	return new MyPromise((resolve, reject) => {
+		if (value instanceof MyPromise) {value.then(resolve, reject)}
+		else {resolve(value)}
+	})
+}
+```
+## reject()
+```js
+static resolve(value) {
+	return new MyPromise((resolve, reject) => {
+		reject(value)
 	})
 }
 ```
