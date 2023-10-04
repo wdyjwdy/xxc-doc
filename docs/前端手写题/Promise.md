@@ -1,16 +1,10 @@
 ## Todo
-- 状态从 `pending` 转化为 `fulfilled` 或 `rejected` 之后，不能再变化
-- 处理 `then` 的同步回调
-- 处理 `then` 的异步回调（`setTimeout`）
-- 处理 `then` 的链式调用
-- 处理 `then` 的微任务
-
-:::danger 为了简洁，省略了一些错误判断：
-1. `promise` 出错时必须 `reject`
-2. `then()` 的参数必须为函数
-3. `all()` 的参数必须可迭代
-4. `any()` 全拒绝，应 `reject AggregateError`
-:::
+- 处理 `state` 的单向变化
+- 处理 `then()` 的同步回调
+- 处理 `then()` 的异步回调
+- 处理 `then()` 的链式调用
+- 处理 `then()` 的微任务
+- 处理 `then()` 的传值穿透
 ## 结构
 ```js
 class MyPromise {
@@ -64,13 +58,17 @@ constructor(executor) {
 			}
 		})
 	}
-	
-	executor(resolve, reject)
+
+  try {executor(resolve, reject)}
+  catch(e) {reject(e)}
 }
 ```
 ## then()
 ```js
 then(onFulfilled, onRejected) {
+	onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : x => x //　处理传值穿透
+	onRejected = typeof onRejected === 'function' ? onRejected : x => { throw x }
+
 	return new MyPromise((resolve, reject) => { // 处理链式调用
 		const resolvePromise = result => {
 			if (result instanceof MyPromise) {result.then(resolve, reject)}
@@ -90,8 +88,7 @@ then(onFulfilled, onRejected) {
 ## catch()
 ```js
 catch(onRejected) {
-	const onFulfilled = value => value
-	return this.then(onFulfilled, onRejected)
+	return this.then(undefined, onRejected)
 }
 ```
 ## finally()
@@ -123,7 +120,17 @@ static all(promises) {
 		})
 	})
 }
+
+:::danger 这里 `promises` 应该是 `iterable`，简化了
+```js
+if (typeof promises[Symbol.iterator] !== 'function') { throw new TypeError('promises is not iterable')}
 ```
+:::
+:::danger 这里 `result` 应该和输入顺序相同，简化了
+```js
+result[index] = value
+```
+:::
 ## any()
 ```js
 static any(promises) {
@@ -134,7 +141,7 @@ static any(promises) {
 		
 		const onRejected = value => {
 			result.push(value)
-			if (result.length === promises.length) {reject(result)}
+			if (result.length === promises.length) {reject(new AggregateError('All promises were rejected'))}
 		}
 		
 		promises.forEach(promise => {
@@ -192,7 +199,7 @@ static resolve(value) {
 ```
 ## reject()
 ```js
-static resolve(value) {
+static reject(value) {
 	return new MyPromise((resolve, reject) => {
 		reject(value)
 	})
