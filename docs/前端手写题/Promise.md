@@ -120,16 +120,10 @@ static all(promises) {
 		})
 	})
 }
-
-:::danger 这里 `promises` 应该是 `iterable`，简化了
-```js
-if (typeof promises[Symbol.iterator] !== 'function') { throw new TypeError('promises is not iterable')}
 ```
-:::
-:::danger 这里 `result` 应该和输入顺序相同，简化了
-```js
-result[index] = value
-```
+:::danger
+- 这里 `promises` 应该是 `iterable`，简化了
+- 这里 `result` 应该和输入顺序相同，简化了
 :::
 ## any()
 ```js
